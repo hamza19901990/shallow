@@ -20,7 +20,7 @@ st.image(image, use_column_width=True)
 
 data = pd.read_csv(r"foundation1.csv")
 
-req_col_names = ["B(m)", "D(m)", "L/B", "angle (degree)","unit weight (kN/m3)","qu"]
+req_col_names = ["B", "D", "LoverB", "angle","unit_weight","qu"]
 curr_col_names = list(data.columns)
 
 mapper = {}
@@ -33,47 +33,41 @@ data.head()
 data.isna().sum()
 corr = data.corr()
 st.dataframe(data)
-
-import pickle
-from sklearn.ensemble import GradientBoostingRegressor
+X = data.iloc[:,:-1]         # Features - All columns but last
+y = data.iloc[:,-1]          # Target - Last Column
+print(X)
 from sklearn.model_selection import train_test_split
-import pandas as pd
+import pickle
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=0)
 
 # Sample data (replace with your own data)
 # X, y = your_features, your_labels
-data = pd.read_csv(r"foundation1.csv")
-X = data.iloc[:,:-1]         # Features - All columns but last
-y = data.iloc[:,-1]
+
 # Split the data
 
-X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=.15,random_state =0)
 # Initialize and train the AdaBoostRegressor
-model = GradientBoostingRegressor(learning_rate=0.01, n_estimators=600, max_depth=3.0)
+model = AdaBoostRegressor(learning_rate=0.5, n_estimators=100)
 model.fit(X_train, y_train)
 
-# Save the model to a pickle file
-with open('GBRT_model.pkl', 'wb') as file:
-    pickle.dump(model, file)
-
-print("Model saved as 'ada_boost_model.pkl'")
 st.sidebar.header('Specify Input Parameters')
-"d10", "d50", "d60", "e"
 def get_input_features():
-    B(m) = st.sidebar.slider('B(m)', 0.030,3.016,0.050)
-    D(m) = st.sidebar.slider('D(m)',0.000,0.890,0.500)
-    L/B = st.sidebar.slider('L/B', 1.000,6.000,3.000)
-    angle (degree) = st.sidebar.slider('angle (degree)', 31.950,45.700,33.000)
-    unit weight (kN/m3) = st.sidebar.slider('unit weight (kN/m3)', 9.850,20.800,20.600)
+    B = st.sidebar.slider('B(m)', 0.03,3.02,0.05)
+    D = st.sidebar.slider('D(m)',0.00,0.89,0.50)
+    LoverB = st.sidebar.slider('L/B', 1.00,6.00,3.00)
+    angle = st.sidebar.slider('angle (degree)', 31.95,45.70,33.00)
+    unit_weight  = st.sidebar.slider('unit weight (kN/m3)', 9.85,20.80,20.60)
 
 
 
 
 
-    data_user = {'B(m)': B(m),
-            'D(m)': D(m),
-            'L/B': L/B,
-            'angle (degree)': angle (degree),
-            'unit weight (kN/m3)': unit weight (kN/m3),
+    data_user = {'B(m)': B,
+            'D(m)': D,
+            'L/B': LoverB,
+            'angle (degree)': angle,
+            'unit weight (kN/m3)': unit_weight,
 
     }
     features = pd.DataFrame(data_user, index=[0])
